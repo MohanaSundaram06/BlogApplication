@@ -71,8 +71,6 @@ public class AuthorService {
     }
     public Author getAuthorByEmail(String email){
         Optional<Author> author = authorRepository.findByEmail(email);
-        System.out.println("The email is");
-        System.out.println(email);
         if(author.isEmpty()) return null;
         return author.get();
     }
