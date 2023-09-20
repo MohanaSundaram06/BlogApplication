@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         Author author = authorService.getAuthorByEmail(username);
-        System.out.println("the security "+ SecurityContextHolder.getContext().getAuthentication() == null);
+//        System.out.println("the security "+ SecurityContextHolder.getContext().getAuthentication() == null);
         if (author == null) throw new UsernameNotFoundException("User Not Found");
         return new MyUserDetails(author);
     }

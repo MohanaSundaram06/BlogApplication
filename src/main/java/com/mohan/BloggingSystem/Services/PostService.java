@@ -9,6 +9,8 @@ import com.mohan.BloggingSystem.Models.Tags;
 import com.mohan.BloggingSystem.Repository.PostRepository;
 import com.mohan.BloggingSystem.Transformers.PostTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -25,6 +27,10 @@ public class PostService {
 
     public PostResponseDto addPost(PostRequestDto postRequestDto) {
         Author author = authorService.getAuthor(postRequestDto.getAuthorId());
+
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(!user.equals(author.getEmail())) throw new AccessDeniedException("");
+
         Post post = PostTransformer.RequestToModel(postRequestDto);
         post.setAuthor(author);
         for(int t : postRequestDto.getTagIds()) {
@@ -90,6 +96,12 @@ public class PostService {
 
     public void deletePost(Integer id) {
         if(!postRepository.existsById(id)) throw new PostNotFoundException("with Id "+ id);
+
+        Post post = postRepository.findById(id).get();
+        Author author = post.getAuthor();
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(!user.equals(author.getEmail())) throw new AccessDeniedException("");
+
         postRepository.deleteById(id);
     }
 
@@ -98,6 +110,11 @@ public class PostService {
         if(!postRepository.existsById(postId)) throw new PostNotFoundException("with Id "+ postId);
 
         Author author = authorService.getAuthor(postRequestDto.getAuthorId());
+
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        Author postAuthor = postRepository.findById(postId).get().getAuthor();
+        if(!user.equals(author.getEmail()) || author.getId() != postAuthor.getId())
+            throw new AccessDeniedException("");
 
         Post post = PostTransformer.RequestToModel(postRequestDto);
         post.setAuthor(author);

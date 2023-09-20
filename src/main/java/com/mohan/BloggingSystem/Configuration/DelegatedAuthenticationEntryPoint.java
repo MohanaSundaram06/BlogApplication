@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +33,8 @@ public class DelegatedAuthenticationEntryPoint implements AuthenticationEntryPoi
         OutputStream responseStream = response.getOutputStream();
         ObjectMapper mapper = new ObjectMapper();
 
-        System.out.println(authException.getMessage());
+        System.out.println(authException.getMessage() + " ");
+//                + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
 
         HashMap<String,String> error = new HashMap<>();
         error.put("status", String.valueOf(HttpStatus.UNAUTHORIZED));

@@ -1,5 +1,6 @@
 package com.mohan.BloggingSystem.Services;
 
+import com.mohan.BloggingSystem.Configuration.MyUserDetails;
 import com.mohan.BloggingSystem.DTOs.Request.AuthorRequestDto;
 import com.mohan.BloggingSystem.DTOs.Request.EditAuthorRequestDto;
 import com.mohan.BloggingSystem.DTOs.Response.AuthorResponseDto;
@@ -9,6 +10,8 @@ import com.mohan.BloggingSystem.Models.Author;
 import com.mohan.BloggingSystem.Repository.AuthorRepository;
 import com.mohan.BloggingSystem.Transformers.AuthorTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -43,16 +46,27 @@ public class AuthorService {
 
     public void deleteAuthor(Integer id) {
         if(!authorRepository.existsById(id)) throw new AuthorNotFoundException("with id " + id);
+
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        Author author = authorRepository.findById(id).get();
+
+        if(!user.equals(author.getEmail())) throw new AccessDeniedException("");
+
         authorRepository.deleteById(id);
     }
 
     public AuthorResponseDto updateAuthor(Integer id, EditAuthorRequestDto authorRequestDto) {
-
+        System.out.println("true");
         Optional<Author> authorOptional = authorRepository.findById(id);
         if(authorOptional.isEmpty()) throw new AuthorNotFoundException("with id " + id);
 
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+
         Author author = authorOptional.get();
-        author.setPassword(authorRequestDto.getUsername());
+
+        if(!user.equals(author.getEmail())) throw new AccessDeniedException("");
+
+        author.setUsername(authorRequestDto.getUsername());
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         author.setPassword(passwordEncoder.encode(authorRequestDto.getPassword()));
 
